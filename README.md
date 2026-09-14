@@ -3,7 +3,7 @@
 [![Paper](https://img.shields.io/badge/Paper-b31b1b.svg)](./FlashREINFORCE.pdf)
 [![Website](https://img.shields.io/badge/Project-Website-blue)](https://yifanzhang-pro.github.io/FlashREINFORCE/)
 [![Code](https://img.shields.io/badge/Code-NVIDIA--NeMo%2Flabs--molt-76B900)](https://github.com/NVIDIA-NeMo/labs-molt)
-[![License](https://img.shields.io/badge/License-Apache%202.0-black.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](./LICENSE)
 
 ### Critic-Free Single-Rollout Asynchronous RL for Agentic Language Models
 
