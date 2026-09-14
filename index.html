@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlashREINFORCE — Critic-Free Single-Rollout Asynchronous RL</title>
+<meta name="description" content="FlashREINFORCE: critic-free, single-rollout, asynchronous reinforcement learning for agentic language models.">
+<meta name="citation_title" content="FlashREINFORCE: Critic-Free Single-Rollout Asynchronous RL for Agentic Language Models">
+<meta name="citation_author" content="Jian Hu">
+<meta name="citation_author" content="Yifan Zhang">
+<meta name="citation_author" content="Hao Zhang">
+<meta name="citation_author" content="Binfeng Xu">
+<meta name="citation_author" content="Shaokun Zhang">
+<meta name="citation_author" content="Hongqing Peng">
+<meta name="citation_author" content="Zhiding Yu">
+<meta name="citation_author" content="Pavlo Molchanov">
+<meta name="citation_author" content="Jan Kautz">
+<meta name="citation_author" content="Yi Dong">
+<meta name="citation_publication_date" content="2026/09/13">
+<meta name="citation_pdf_url" content="https://raw.githubusercontent.com/yifanzhang-pro/FlashREINFORCE/master/FlashREINFORCE.pdf">
+<meta property="og:title" content="FlashREINFORCE">
+<meta property="og:description" content="Critic-Free Single-Rollout Asynchronous RL for Agentic Language Models">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230A0A0A'/%3E%3Ctext x='50' y='61' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='white' text-anchor='middle'%3EFR%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --bg:#fff;--sub:#f7f7f5;--sub2:#efefec;--ink:#0a0a0a;--ink2:#3b3b3b;--ink3:#707070;
+  --line:#e5e5e1;--dark:#0a0a0a;--green:#76b900;--amber:#d99a00;--slate:#5f6b76;
+  --max:1120px;--nav:68px;--ease:cubic-bezier(.22,.61,.36,1)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}.container{width:100%;max-width:var(--max);margin:0 auto;padding:0 clamp(1.25rem,5vw,3rem)}
+nav{position:fixed;inset:0 0 auto;z-index:30;height:var(--nav);display:flex;align-items:center;border-bottom:1px solid transparent;transition:.35s var(--ease);color:#fff}nav.scrolled{background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-bottom-color:var(--line);color:var(--ink)}nav .container{display:flex;align-items:center;justify-content:space-between}.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.navlinks{display:flex;gap:1.6rem;align-items:center}.navlinks a{font-size:.76rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;opacity:.68}.navlinks a:hover{opacity:1}.menu{display:none;border:0;background:none;color:inherit;font-size:1.5rem}
+.hero{min-height:78vh;min-height:78svh;padding-top:var(--nav);display:flex;align-items:center;position:relative;overflow:hidden;background:var(--dark);color:#fff}.hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 85% 80% at 50% 40%,#000 24%,transparent 80%)}.hero:after{content:"";position:absolute;width:80vw;height:80vw;max-width:1100px;max-height:1100px;left:50%;top:38%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(118,185,0,.16),transparent 60%)}.hero-inner{position:relative;z-index:1;text-align:center;padding:5rem 0 4.5rem}.eyebrow{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:700;margin-bottom:1rem}.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,8vw,6.4rem);line-height:.95;letter-spacing:-.055em;margin:.1rem 0 1.25rem;font-weight:500}.hero .subtitle{max-width:900px;margin:0 auto;color:rgba(255,255,255,.68);font-size:clamp(1.05rem,1.8vw,1.35rem)}.hero .subtitle strong{color:#fff;font-weight:600}.tagline{margin:1.45rem auto 0;font-family:'Space Grotesk',sans-serif;font-size:clamp(1.1rem,2vw,1.45rem);font-weight:600}.authors{max-width:960px;margin:1.7rem auto 0;color:rgba(255,255,255,.68);font-size:.94rem}.authors strong{color:#fff}.links{display:flex;flex-wrap:wrap;justify-content:center;gap:.7rem;margin-top:1.8rem}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:.62rem 1rem;border:1px solid rgba(255,255,255,.18);border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.86);transition:.2s}.btn:hover{border-color:#fff;color:#fff;transform:translateY(-1px)}.btn.primary{background:#fff;color:#0a0a0a;border-color:#fff}
+section{padding:clamp(4rem,8vw,6.5rem) 0;border-bottom:1px solid var(--line)}section.alt{background:var(--sub)}.section-kicker{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--ink3);margin-bottom:.6rem}.section-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.04em;line-height:1.08;margin:0 0 1rem}.lead{max-width:820px;font-size:1.1rem;color:var(--ink2);margin:0 0 2.2rem}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.card{border:1px solid var(--line);border-radius:14px;padding:1.45rem;background:#fff}.card .num{font-family:'Space Grotesk',sans-serif;font-size:.74rem;font-weight:700;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase}.card h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;letter-spacing:-.02em;margin:.55rem 0 .6rem}.card p{margin:0;color:var(--ink2);font-size:.96rem}.accent-green{border-top:3px solid var(--green)}.accent-slate{border-top:3px solid var(--slate)}.accent-amber{border-top:3px solid var(--amber)}
+.pipeline{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:.8rem;margin:2rem 0}.step{border:1px solid var(--line);border-radius:14px;background:#fff;padding:1.3rem}.step .label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}.step h3{font-family:'Space Grotesk',sans-serif;margin:.45rem 0 .55rem;font-size:1.15rem}.step p{margin:0;color:var(--ink2);font-size:.92rem}.arrow{align-self:center;color:var(--ink3);font-size:1.4rem}.formula{background:#0a0a0a;color:#fff;border-radius:14px;padding:1.15rem 1.4rem;margin:1rem 0;overflow:auto;text-align:center}.formula mjx-container{margin:.35rem 0!important}.method-row{display:grid;grid-template-columns:.86fr 1.14fr;gap:2rem;align-items:start;margin-top:2rem}.method-copy h3{font-family:'Space Grotesk',sans-serif;font-size:1.45rem;letter-spacing:-.02em;margin:0 0 .75rem}.method-copy p{color:var(--ink2);margin:.6rem 0}.note{border-left:2px solid var(--ink);background:var(--sub);padding:1rem 1.2rem;border-radius:0 10px 10px 0;color:var(--ink2);margin-top:1rem}
+.results{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:2rem 0}.metric{border:1px solid var(--line);border-radius:14px;padding:1.25rem;background:#fff}.metric .value{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:600;letter-spacing:-.04em;line-height:1}.metric .caption{font-size:.86rem;color:var(--ink3);margin-top:.55rem}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{text-align:left;padding:.9rem 1rem;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);background:var(--sub)}tr:last-child td{border-bottom:0}td strong{color:var(--ink)}
+.bullets{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.bullet{border:1px solid var(--line);border-radius:14px;padding:1.2rem;background:#fff}.bullet strong{display:block;font-family:'Space Grotesk',sans-serif;margin-bottom:.3rem}.bullet span{color:var(--ink2);font-size:.94rem}.citation{background:#0a0a0a;color:#e8e8e4;padding:1.25rem;border-radius:14px;overflow:auto;font-size:.84rem;line-height:1.6}.footer{padding:2rem 0;color:var(--ink3);font-size:.84rem}.footer .container{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+@media(max-width:900px){.grid3,.results{grid-template-columns:1fr 1fr}.method-row{grid-template-columns:1fr}.pipeline{grid-template-columns:1fr}.arrow{transform:rotate(90deg);justify-self:center}.navlinks{display:none}.menu{display:block}.navlinks.open{display:flex;position:absolute;top:var(--nav);left:0;right:0;padding:1rem 1.25rem 1.3rem;background:#0a0a0a;flex-direction:column;align-items:flex-start;color:#fff}.scrolled .navlinks.open{background:#fff;color:#0a0a0a;border-bottom:1px solid var(--line)}}
+@media(max-width:620px){.grid3,.results,.bullets{grid-template-columns:1fr}.hero-inner{padding:3.7rem 0 3.5rem}.hero h1{font-size:clamp(2.7rem,16vw,4.2rem)}.authors{font-size:.88rem}}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <div class="container">
+    <a class="brand" href="#top">FlashREINFORCE</a>
+    <button class="menu" id="menu" aria-label="Toggle navigation">☰</button>
+    <div class="navlinks" id="navlinks">
+      <a href="#overview">Overview</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="./FlashREINFORCE.pdf">Paper</a>
+      <a href="https://github.com/yifanzhang-pro/FlashREINFORCE">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container hero-inner">
+    <div class="eyebrow">Asynchronous reinforcement learning for agents</div>
+    <h1>FlashREINFORCE</h1>
+    <p class="subtitle"><strong>Critic-Free · Single-Rollout · Asynchronous RL</strong><br>for Agentic Language Models</p>
+    <div class="tagline">Reinforcement Learning Should Do REINFORCE.</div>
+    <div class="authors">
+      <strong>Jian Hu*</strong> · <strong>Yifan Zhang*</strong> · <strong>Hao Zhang*</strong> · <strong>Binfeng Xu*</strong> · Shaokun Zhang · Hongqing Peng · Zhiding Yu · Pavlo Molchanov · Jan Kautz · Yi Dong<br>
+      NVIDIA · * Equal contribution
+    </div>
+    <div class="links">
+      <a class="btn primary" href="./FlashREINFORCE.pdf">Read Paper</a>
+      <a class="btn" href="https://github.com/NVIDIA-NeMo/labs-molt">Code</a>
+      <a class="btn" href="https://github.com/yifanzhang-pro/FlashREINFORCE">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="overview">
+  <div class="container">
+    <div class="section-kicker">Overview</div>
+    <h2 class="section-title">One rollout per prompt. One update per batch.</h2>
+    <p class="lead">Group-relative RL spends several rollouts on the same prompt and waits for sibling trajectories. FlashREINFORCE uses one rollout per prompt, preserving prompt coverage and naturally fitting asynchronous long-horizon agents — without learning a critic.</p>
+    <div class="grid3">
+      <article class="card accent-green">
+        <div class="num">01 · Signed feedback</div>
+        <h3>One-Batch REINFORCE</h3>
+        <p>Center rewards across the next fresh batch of independent prompts. Successes and failures both contribute, with no value network and no sibling-rollout group baseline.</p>
+      </article>
+      <article class="card accent-slate">
+        <div class="num">02 · Drift control</div>
+        <h3>Sequence Trust Region</h3>
+        <p>Use token importance sampling for behavior correction, then screen complete trajectories with a sequence-level sampled-action KL proxy.</p>
+      </article>
+      <article class="card accent-amber">
+        <div class="num">03 · Length control</div>
+        <h3>Sample-Mean Optimization</h3>
+        <p>Average within each trajectory before averaging across the batch so long failures do not receive an automatic length multiplier.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="method">
+  <div class="container">
+    <div class="section-kicker">Method</div>
+    <h2 class="section-title">A one-pass asynchronous policy-gradient update.</h2>
+    <p class="lead">A rollout worker stores the probability that actually generated every action. The learner recomputes the current policy, corrects the action distribution locally, admits or rejects the full trajectory, and performs exactly one update on the fresh batch.</p>
+
+    <div class="pipeline">
+      <div class="step"><div class="label">Collect</div><h3>One rollout / prompt</h3><p>Workers submit trajectories independently as soon as they finish.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="label">Correct + trust</div><h3>IS + sequence gate</h3><p>Correct sampled actions and screen accumulated trajectory drift.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="label">Optimize</div><h3>Sample mean</h3><p>Take one full-batch step, then discard the batch rather than replay it.</p></div>
+    </div>
+
+    <div class="method-row">
+      <div class="method-copy">
+        <h3>1. One-Batch REINFORCE</h3>
+        <p>For the next \(B\) completed trajectories, center scalar rewards across independent prompts:</p>
+        <div class="formula">\[\bar R=\frac1B\sum_{j=1}^{B}R_j,\qquad A_i=R_i-\bar R.\]</div>
+        <p>The batch mean is a critic-free control variate. It creates signed feedback while keeping the data path single-rollout.</p>
+      </div>
+      <div class="method-copy">
+        <h3>2. Behavior correction + Sequence Trust Region</h3>
+        <p>For each sampled token, use the learner-to-behavior ratio</p>
+        <div class="formula">\[\rho_{i,t}=\exp\!\left(\log\pi_\theta(a_{i,t}\mid h_{i,t})-\log\mu_i(a_{i,t}\mid h_{i,t})\right).\]</div>
+        <p>Token IS corrects actions at stored histories. The remaining history-distribution mismatch motivates a trajectory-level trust decision. FlashREINFORCE averages a sampled-action Bernoulli KL proxy over the sequence and admits trajectory \(i\) when \(\bar D_i\le\delta\).</p>
+      </div>
+    </div>
+
+    <div class="method-row">
+      <div class="method-copy">
+        <h3>3. Sample-Mean Optimization</h3>
+        <p>Each admitted trajectory receives equal outer weight, independent of response length:</p>
+        <div class="formula">\[\widehat{\mathcal J}_{\mathrm{FR}}(\theta)=\frac1B\sum_{i=1}^{B}\frac{m_iA_i}{T_i}\sum_{t=1}^{T_i}\frac{\pi_\theta(a_{i,t}\mid h_{i,t})}{\mu_i(a_{i,t}\mid h_{i,t})}.\]</div>
+        <p>This retains signed feedback without letting long negative trajectories dominate simply because they contain more tokens.</p>
+      </div>
+      <div class="method-copy">
+        <h3>What the base method does not need</h3>
+        <div class="bullets">
+          <div class="bullet"><strong>No learned critic</strong><span>Advantages come from fresh-batch reward centering.</span></div>
+          <div class="bullet"><strong>No ratio clipping</strong><span>Behavior correction is paired with divergence-based trajectory admission.</span></div>
+          <div class="bullet"><strong>No reference-model forward pass</strong><span>The base update is deliberately lightweight.</span></div>
+          <div class="bullet"><strong>No sibling-rollout wait</strong><span>Completed trajectories can enter the learner immediately.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note"><strong>Important:</strong> store the behavior probability used by the sampler itself. Recomputing an “old” probability later is not guaranteed to reproduce the sampling distribution, especially when the training and inference stacks differ.</div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="container">
+    <div class="section-kicker">Results</div>
+    <h2 class="section-title">Stable under policy lag, competitive with fewer rollouts.</h2>
+    <p class="lead">Experiments cover long-chain mathematical reasoning, multi-turn Python tool use, a 30B MoE model, and interactive ALFWorld agents.</p>
+
+    <div class="results">
+      <div class="metric"><div class="value">6,000</div><div class="caption">stable updates on DeepSeek-R1-Distill-Qwen-1.5B at policy lag ≈4</div></div>
+      <div class="metric"><div class="value">38.0</div><div class="caption">five-benchmark mean on Qwen2.5-Math-1.5B</div></div>
+      <div class="metric"><div class="value">½</div><div class="caption">the rollouts of the reported GRPO comparison: 256k vs 512k</div></div>
+      <div class="metric"><div class="value">98.3%</div><div class="caption">ALFWorld seen success; unseen success is 96.5%</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>FlashREINFORCE</th><th>Comparison / observation</th></tr></thead>
+        <tbody>
+          <tr><td>Long-CoT · DeepSeek-R1-Distill-Qwen-1.5B</td><td><strong>AIME24/25 mean 21.7 → 33.7</strong></td><td>Stable through 6,000 updates at lag ≈4.</td></tr>
+          <tr><td>Reasoning · Qwen2.5-Math-1.5B</td><td><strong>38.0 mean</strong>, 256k rollouts</td><td>Reported GRPO baseline: 36.3 mean, 512k rollouts.</td></tr>
+          <tr><td>Python tool · Qwen2.5-7B-Instruct</td><td><strong>37.0 mean</strong>, 3.25 calls / trajectory</td><td>Compared GRPO run: 30.3 mean and 0.00 tool calls at step 600.</td></tr>
+          <tr><td>Python tool · Qwen3-30B-A3B</td><td><strong>Stable at lag ≈8</strong></td><td>Leads the matched-budget GRPO comparison by 6.8 points.</td></tr>
+          <tr><td>ALFWorld · Qwen2.5-7B-Instruct</td><td><strong>98.3% seen / 96.5% unseen</strong></td><td>Evaluated at step 200 after 12.8k training trajectories.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="principles">
+  <div class="container">
+    <div class="section-kicker">Practical principles</div>
+    <h2 class="section-title">Asynchronous RL is an algorithm–systems co-design problem.</h2>
+    <div class="bullets">
+      <div class="bullet"><strong>Prompt coverage over sibling multiplicity</strong><span>With a fixed rollout budget, one rollout per prompt covers more distinct tasks and removes group synchronization barriers.</span></div>
+      <div class="bullet"><strong>Fresh means unused, not necessarily young</strong><span>A trajectory can be stale in policy age but still fresh for optimization. The trust region handles drift; one-batch training avoids repeated updates on the same collected data.</span></div>
+      <div class="bullet"><strong>Token IS is not full trajectory correction</strong><span>It corrects the sampled action at a stored history. The history itself still came from the behavior policy, motivating sequence-level drift control.</span></div>
+      <div class="bullet"><strong>Support still matters</strong><span>Exact importance correction assumes common support. Aggressive top-k or top-p truncation can violate that assumption.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="paper">
+  <div class="container">
+    <div class="section-kicker">Paper & code</div>
+    <h2 class="section-title">FlashREINFORCE</h2>
+    <p class="lead">Critic-Free Single-Rollout Asynchronous RL for Agentic Language Models.</p>
+    <div class="links" style="justify-content:flex-start;margin:0 0 2rem">
+      <a class="btn primary" style="background:#0a0a0a;color:#fff;border-color:#0a0a0a" href="./FlashREINFORCE.pdf">Paper PDF</a>
+      <a class="btn" style="color:#0a0a0a;border-color:#c8c8c4" href="https://github.com/NVIDIA-NeMo/labs-molt">Code</a>
+      <a class="btn" style="color:#0a0a0a;border-color:#c8c8c4" href="https://github.com/yifanzhang-pro/FlashREINFORCE">Repository</a>
+    </div>
+    <pre class="citation">@article{hu2026flashreinforce,
+  title  = {FlashREINFORCE: Critic-Free Single-Rollout Asynchronous RL for Agentic Language Models},
+  author = {Hu, Jian and Zhang, Yifan and Zhang, Hao and Xu, Binfeng and Zhang, Shaokun and Peng, Hongqing and Yu, Zhiding and Molchanov, Pavlo and Kautz, Jan and Dong, Yi},
+  year   = {2026},
+  url    = {https://github.com/yifanzhang-pro/FlashREINFORCE}
+}</pre>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <span>FlashREINFORCE · NVIDIA · 2026</span>
+    <span>Apache License 2.0</span>
+  </div>
+</footer>
+
+<script>
+const nav=document.getElementById('nav');
+const menu=document.getElementById('menu');
+const navlinks=document.getElementById('navlinks');
+function updateNav(){nav.classList.toggle('scrolled',window.scrollY>18)}
+updateNav();window.addEventListener('scroll',updateNav,{passive:true});
+menu.addEventListener('click',()=>navlinks.classList.toggle('open'));
+navlinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navlinks.classList.remove('open')));
+</script>
+</body>
+</html>
