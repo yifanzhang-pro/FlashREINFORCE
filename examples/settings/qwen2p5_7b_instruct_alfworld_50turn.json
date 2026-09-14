@@ -1,0 +1,46 @@
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "agent_kind": "alfworld",
+  "max_agent_turns": 50,
+  "flags": {
+    "data.label_key": "game_file",
+    "data.max_samples": 1024,
+    "data.max_len": 16384,
+    "rollout.max_new_tokens": 8192,
+    "rollout.batch_size": 64,
+    "train.batch_size": 64,
+    "train.num_episodes": 20,
+    "actor.lr_scheduler": "constant",
+    "actor.flash_neg_topq": 0.9,
+    "eval.steps": 40,
+    "eval.n_samples_per_prompt": 3,
+    "eval.temperature": 1.0,
+    "eval.top_p": 0.7
+  },
+  "variants": {
+    "negative_q02": {
+      "actor.flash_neg_topq": 0.2
+    },
+    "no_is": {
+      "actor.flash_no_is": true
+    },
+    "grpo": {
+      "actor.loss_mode": "ppo",
+      "algo.advantage.estimator": "grpo",
+      "algo.advantage.no_whiten": true,
+      "rollout.batch_size": 8,
+      "rollout.n_samples_per_prompt": 8,
+      "train.num_episodes": 3,
+      "actor.eps_clip_low_high": [
+        0.2,
+        0.2
+      ]
+    }
+  },
+  "notes": [
+    "Requires ALFWorld, its game data, and an agent returning terminal success reward.",
+    "Evaluation contains 140 seen and 134 unseen games, with three samples per game.",
+    "Set ALFWORLD_DATA to a local installation; game_file values must resolve in the worker environment.",
+    "GRPO uses the same one-pass collection/update schedule and the trainer's token-mean PPO reduction."
+  ]
+}

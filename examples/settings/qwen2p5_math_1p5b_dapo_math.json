@@ -1,0 +1,34 @@
+{
+  "model": "Qwen/Qwen2.5-Math-1.5B",
+  "agent_kind": "math",
+  "max_agent_turns": 1,
+  "flags": {
+    "data.max_samples": 7500,
+    "data.max_len": 6144,
+    "rollout.max_new_tokens": 4096,
+    "train.num_episodes": 68,
+    "actor.flash_gate_delta": 0.003,
+    "train.micro_batch_size": 2
+  },
+  "variants": {
+    "gate_1e3": {
+      "actor.flash_gate_delta": 0.001
+    },
+    "negative_q09": {
+      "actor.flash_gate_delta": 0.001,
+      "actor.flash_neg_topq": 0.9
+    },
+    "negative_q02": {
+      "actor.flash_gate_delta": 0.001,
+      "actor.flash_neg_topq": 0.2
+    },
+    "five_benchmark_eval16": {
+      "eval.n_samples_per_prompt": 16
+    }
+  },
+  "notes": [
+    "Use deduplicated 7,500-problem DAPO training data.",
+    "Default online evaluation uses AMC23/Minerva/AIME25 avg@4; five_benchmark_eval16 requires the five-task dataset.",
+    "Model configuration must support a total context of 6,144 tokens."
+  ]
+}

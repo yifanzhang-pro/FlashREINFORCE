@@ -167,11 +167,15 @@ The optional tests execute Molt's loss module and its `masked_mean` function in
 isolation and compare gradients and admission rates, including unequal lengths
 and rejected sequences. They do not test distributed scheduling or GPU kernels.
 
-## Release scope
+## Additional experiment settings
 
-Python-tool 7B, Qwen3 MoE routing replay and ALFWorld require their original
-agents, environment setup, data formatting and experiment artifacts. They are
-not represented by the single-turn math recipes above. Paper scores in the
-README are reported research results, not outputs of the CPU example or newly
-validated reproductions. GPU training and benchmark reproduction remain to be
-run on the target infrastructure.
+See [examples/README.md](../examples/README.md) for R1 and Qwen Math variants,
+7B Python-tool settings, a 20-turn Qwen3 MoE trust ablation, and ALFWorld settings.
+These use the native FlashREINFORCE interface and require a compatible trainer;
+the public Molt launcher above retains its pinned interface. Tool/ALFWorld
+agents, data and checkpoints are supplied separately. Routing-replay recipes
+and staged checkpoint continuation are not included.
+
+Paper scores in the README are reported research results, not outputs of the
+CPU example or newly validated reproductions. GPU training and benchmark
+reproduction remain to be run on the target infrastructure.

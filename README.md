@@ -20,7 +20,8 @@
 ## Code and quick start
 
 This repository now includes a standalone PyTorch reference loss, a CPU update
-example, and pinned Molt launchers for R1 and Qwen2.5-Math. The launchers use
+example, pinned Molt launchers for R1 and Qwen2.5-Math, and experiment settings
+for reasoning, Python tools, MoE and ALFWorld. The launchers use
 Molt's asynchronous training implementation.
 
 ```bash
@@ -34,10 +35,12 @@ python -m pytest -q
 - [Training guide](docs/training.md): GPU setup, data preparation, commands,
   paper-to-code mapping, and reproduction limitations.
 - [Molt launcher](scripts/train_molt.py): `--dry-run` previews all training flags.
+- [Experiment settings](examples/README.md): task presets, ablations and a native
+  trainer launcher with capability checks.
 
 The CPU example checks an optimizer update; it does not reproduce the paper's
-benchmark scores. Tool-use, MoE routing-replay and ALFWorld experiment recipes
-are not included in this initial implementation.
+benchmark scores. Tool and ALFWorld settings require compatible agents and
+environments; see the examples guide for runtime requirements.
 
 ## Why single-rollout RL?
 

@@ -1,0 +1,47 @@
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "agent_kind": "python_tool",
+  "max_agent_turns": 10,
+  "flags": {
+    "data.max_samples": 7500,
+    "data.max_len": 8192,
+    "rollout.max_new_tokens": 6144,
+    "train.num_episodes": 68
+  },
+  "variants": {
+    "negative_q09": {
+      "actor.flash_neg_topq": 0.9
+    },
+    "negative_q02": {
+      "actor.flash_neg_topq": 0.2
+    },
+    "negative_q00": {
+      "actor.flash_neg_topq": 0.0
+    },
+    "token_mean": {
+      "actor.flash_loss_agg": "token-mean"
+    },
+    "constant_length": {
+      "actor.flash_loss_agg": "seq-mean-token-sum-norm",
+      "actor.loss_scale_factor": 6144
+    },
+    "grpo": {
+      "actor.loss_mode": "ppo",
+      "algo.advantage.estimator": "grpo",
+      "algo.advantage.no_whiten": true,
+      "rollout.batch_size": 32,
+      "rollout.n_samples_per_prompt": 4,
+      "train.num_episodes": 17,
+      "actor.eps_clip_low_high": [
+        0.2,
+        0.2
+      ]
+    }
+  },
+  "notes": [
+    "Use tool-formatted DAPO prompts and a Python-tool agent that grades only the committed final answer.",
+    "This is the 10-turn / 8,192-context setting, not a later expanded-context continuation.",
+    "Reduction variants select the loss only; they do not load a checkpoint or reproduce a continuation run.",
+    "GRPO uses the same one-pass collection/update schedule and the trainer's token-mean PPO reduction."
+  ]
+}
