@@ -17,6 +17,28 @@
 
 [[Paper](./FlashREINFORCE.pdf)] [[Project Website](https://yifanzhang-pro.github.io/FlashREINFORCE/)] [[Code](https://github.com/NVIDIA-NeMo/labs-molt)]
 
+## Code and quick start
+
+This repository now includes a standalone PyTorch reference loss, a CPU update
+example, and pinned Molt launchers for R1 and Qwen2.5-Math. The launchers use
+Molt's asynchronous training implementation.
+
+```bash
+pip install -e '.[test]'
+python examples/toy_update.py
+python -m pytest -q
+```
+
+- [Reference objective](flashreinforce/loss.py): batch centering, token IS,
+  sequence trust, sample mean, and optional entropy-based failure-token filtering.
+- [Training guide](docs/training.md): GPU setup, data preparation, commands,
+  paper-to-code mapping, and reproduction limitations.
+- [Molt launcher](scripts/train_molt.py): `--dry-run` previews all training flags.
+
+The CPU example checks an optimizer update; it does not reproduce the paper's
+benchmark scores. Tool-use, MoE routing-replay and ALFWorld experiment recipes
+are not included in this initial implementation.
+
 ## Why single-rollout RL?
 
 Long-horizon agents have irregular rollout times because of tool calls, environment interaction, and variable-length reasoning. Group-relative methods require multiple sibling rollouts of the same prompt, which reduces prompt coverage at a fixed rollout budget and introduces synchronization barriers.

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flashreinforce"
+version = "0.1.0"
+description = "FlashREINFORCE reference objective and Molt training recipes"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.2"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["flashreinforce*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
