@@ -15,7 +15,7 @@ SETTINGS = Path(__file__).resolve().parent / 'settings'
 def load_settings(name, variants=()):
     """Merge shared flags, one experiment, then explicitly selected variants."""
     config = json.loads((SETTINGS / f'{name}.json').read_text())
-    flags = json.loads((SETTINGS / 'common.json').read_text())
+    flags = json.loads((SETTINGS / 'flashreinforce_shared_defaults.json').read_text())
     flags.update(config['flags'])
     for variant in variants:
         if variant not in config['variants']:
@@ -36,7 +36,7 @@ def load_settings(name, variants=()):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    names = sorted(p.stem for p in SETTINGS.glob('*.json') if p.stem != 'common')
+    names = sorted(p.stem for p in SETTINGS.glob('*.json') if p.stem != 'flashreinforce_shared_defaults')
     parser.add_argument('--setting', choices=names, required=True)
     parser.add_argument('--variant', action='append', default=[])
     parser.add_argument('--print-config', action='store_true')

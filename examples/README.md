@@ -1,17 +1,17 @@
 # Experiment settings
 
 `settings/` contains model, sampling, optimization and evaluation settings for
-reasoning, tool use and ALFWorld. Shared flags are in `common.json`; each JSON
+reasoning, tool use and ALFWorld. Shared flags are in `flashreinforce_shared_defaults.json`; each JSON
 file overrides them for one experiment. Named variants override only the listed
 flags. Models, datasets, agents and GPU placement are supplied separately.
 
 | Setting | Batch (prompts × samples) | Total / generated tokens | Turns | Sequence gate | Online evaluation |
 | --- | --- | --- | --- | --- | --- |
-| `r1` | 128 × 1 | 9,216 / 8,192 | 1 | 3e-3; variant 5e-3 | AIME24/25, avg@32, every 128 updates |
-| `qwen_math` | 128 × 1 | 6,144 / 4,096 | 1 | 3e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
-| `qwen7b_tool` | 128 × 1 | 8,192 / 6,144 | 10 | 1e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
-| `qwen3_tool_ablation` | 128 × 1 | 16,384 / 14,336 | 20 | 3e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
-| `alfworld` | 64 × 1 | 16,384 / 8,192 | 50 | 1e-3 | 140 seen + 134 unseen games, 3 samples/game, every 40 updates |
+| `deepseek_r1_distill_qwen_1p5b_math_sanity` | 128 × 1 | 9,216 / 8,192 | 1 | 3e-3; variant 5e-3 | AIME24/25, avg@32, every 128 updates |
+| `qwen2p5_math_1p5b_dapo_math` | 128 × 1 | 6,144 / 4,096 | 1 | 3e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
+| `qwen2p5_7b_instruct_python_tool_10turn` | 128 × 1 | 8,192 / 6,144 | 10 | 1e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
+| `qwen3_30b_a3b_python_tool_20turn_trust_ablation` | 128 × 1 | 16,384 / 14,336 | 20 | 3e-3 | AMC23/Minerva/AIME25, avg@4, every 100 updates |
+| `qwen2p5_7b_instruct_alfworld_50turn` | 64 × 1 | 16,384 / 8,192 | 50 | 1e-3 | 140 seen + 134 unseen games, 3 samples/game, every 40 updates |
 
 Generated-token limits are passed to the trainer's `rollout.max_new_tokens`;
 for multi-turn environments the runner also enforces the total context limit.
@@ -25,9 +25,9 @@ a new run; it does not replay an earlier checkpoint or schedule history.
 ## Inspect without a GPU or trainer installation
 
 ```bash
-python examples/run_experiment.py --setting r1 --print-config
-python examples/run_experiment.py --setting qwen7b_tool --variant negative_q09 --print-config
-python examples/run_experiment.py --setting alfworld --variant grpo --print-config
+python examples/run_experiment.py --setting deepseek_r1_distill_qwen_1p5b_math_sanity --print-config
+python examples/run_experiment.py --setting qwen2p5_7b_instruct_python_tool_10turn --variant negative_q09 --print-config
+python examples/run_experiment.py --setting qwen2p5_7b_instruct_alfworld_50turn --variant grpo --print-config
 ```
 
 Variant names:
@@ -77,21 +77,21 @@ The launcher runs its `--help` and rejects unsupported flags before starting
 training. It does not patch the trainer or silently remove unsupported settings.
 
 ```bash
-python examples/run_experiment.py --setting qwen_math \
+python examples/run_experiment.py --setting qwen2p5_math_1p5b_dapo_math \
   --trainer-path /path/to/compatible-trainer \
   --model /path/to/Qwen2.5-Math-1.5B \
   --train-data /path/to/dapo-7500/train --eval-data /path/to/math-eval \
   --actor-gpus 2 --rollout-engines 14 \
   --output outputs/qwen-math --dry-run
 
-python examples/run_experiment.py --setting qwen7b_tool --variant negative_q09 \
+python examples/run_experiment.py --setting qwen2p5_7b_instruct_python_tool_10turn --variant negative_q09 \
   --trainer-path /path/to/compatible-trainer \
   --agent-path /path/to/python_tool_agent.py \
   --train-data /path/to/tool-train --eval-data /path/to/tool-eval \
   --actor-gpus 8 --rollout-engines 4 --rollout-tp 2 \
   --output outputs/qwen7b-tool --dry-run
 
-python examples/run_experiment.py --setting alfworld \
+python examples/run_experiment.py --setting qwen2p5_7b_instruct_alfworld_50turn \
   --trainer-path /path/to/compatible-trainer \
   --agent-path /path/to/alfworld_agent.py \
   --train-data /path/to/alfworld/train --eval-data /path/to/alfworld/eval \

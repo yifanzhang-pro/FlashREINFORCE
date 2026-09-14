@@ -13,7 +13,7 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 CASES = []
 for path in (ROOT / 'examples/settings').glob('*.json'):
-    if path.stem != 'common':
+    if path.stem != 'flashreinforce_shared_defaults':
         variants = json.loads(path.read_text())['variants']
         CASES.extend((path.stem, variant) for variant in [None, *variants])
 
@@ -36,19 +36,19 @@ def test_all_settings_preserve_batch_and_loss_contract(name, variant):
 
 
 def test_settings_distinguish_collection_and_online_evaluation():
-    math = MODULE.load_settings('qwen_math')['flags']
-    r1 = MODULE.load_settings('r1')['flags']
+    math = MODULE.load_settings('qwen2p5_math_1p5b_dapo_math')['flags']
+    r1 = MODULE.load_settings('deepseek_r1_distill_qwen_1p5b_math_sanity')['flags']
     assert (math['rollout.vllm_generate_batch_size'], math['train.async_queue_size']) == (16, 1)
     assert (r1['rollout.vllm_generate_batch_size'], r1['train.async_queue_size']) == (512, 8)
     assert math['eval.n_samples_per_prompt'] == 4
-    assert MODULE.load_settings('qwen_math', ['five_benchmark_eval16'])['flags']['eval.n_samples_per_prompt'] == 16
-    assert MODULE.load_settings('qwen7b_tool')['max_agent_turns'] == 10
-    assert MODULE.load_settings('qwen3_tool_ablation')['max_agent_turns'] == 20
+    assert MODULE.load_settings('qwen2p5_math_1p5b_dapo_math', ['five_benchmark_eval16'])['flags']['eval.n_samples_per_prompt'] == 16
+    assert MODULE.load_settings('qwen2p5_7b_instruct_python_tool_10turn')['max_agent_turns'] == 10
+    assert MODULE.load_settings('qwen3_30b_a3b_python_tool_20turn_trust_ablation')['max_agent_turns'] == 20
 
 
 def test_unknown_variant_is_rejected():
     with pytest.raises(ValueError, match='Unknown variant'):
-        MODULE.load_settings('r1', ['typo'])
+        MODULE.load_settings('deepseek_r1_distill_qwen_1p5b_math_sanity', ['typo'])
 
 
 @pytest.mark.parametrize('supported', [False, True])
@@ -62,7 +62,7 @@ def test_launch_checks_runtime_flags_before_training(tmp_path, supported):
     data = tmp_path / 'data'
     data.mkdir()
     output = tmp_path / 'output'
-    command = [sys.executable, str(ROOT / 'examples/run_experiment.py'), '--setting', 'qwen_math',
+    command = [sys.executable, str(ROOT / 'examples/run_experiment.py'), '--setting', 'qwen2p5_math_1p5b_dapo_math',
                '--trainer-path', str(trainer), '--train-data', str(data), '--eval-data', str(data),
                '--actor-gpus', '2', '--rollout-engines', '2', '--output', str(output)]
     preview = subprocess.run([*command, '--dry-run'], text=True, capture_output=True, check=True)
@@ -90,7 +90,7 @@ def test_launch_checks_runtime_flags_before_training(tmp_path, supported):
 
 def test_tool_setting_requires_agent_even_for_preview(tmp_path):
     result = subprocess.run([sys.executable, str(ROOT / 'examples/run_experiment.py'),
-        '--setting', 'qwen7b_tool', '--trainer-path', str(tmp_path),
+        '--setting', 'qwen2p5_7b_instruct_python_tool_10turn', '--trainer-path', str(tmp_path),
         '--train-data', str(tmp_path), '--eval-data', str(tmp_path),
         '--actor-gpus', '1', '--rollout-engines', '1', '--dry-run'], capture_output=True, text=True)
     assert result.returncode != 0 and '--agent-path' in result.stderr
