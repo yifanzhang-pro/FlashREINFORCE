@@ -1,0 +1,27 @@
+{
+  "model": "Qwen/Qwen3-30B-A3B",
+  "agent_kind": "python_tool",
+  "max_agent_turns": 20,
+  "flags": {
+    "data.max_samples": 7500,
+    "data.max_len": 16384,
+    "rollout.max_new_tokens": 14336,
+    "train.num_episodes": 17,
+    "train.async_queue_size": 4,
+    "actor.flash_gate_delta": 0.003
+  },
+  "variants": {
+    "no_trust": {
+      "actor.flash_gate_delta": 1000000000.0
+    },
+    "no_is": {
+      "actor.flash_no_is": true,
+      "actor.flash_gate_delta": 0.001
+    }
+  },
+  "notes": [
+    "20-turn tool trust ablation; distinct from the 10-turn / 18,432-context setting in the paper.",
+    "no_is uses the current policy as the detached denominator; the binary-KL gate then also becomes inactive.",
+    "Choose actor EP/CP and rollout TP to fit the MoE model on the available GPUs."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+  "agent_kind": "math",
+  "max_agent_turns": 1,
+  "flags": {
+    "data.max_samples": 1460,
+    "data.max_len": 9216,
+    "rollout.max_new_tokens": 8192,
+    "rollout.vllm_generate_batch_size": 512,
+    "train.async_queue_size": 8,
+    "train.num_episodes": 350,
+    "actor.flash_gate_delta": 0.003,
+    "eval.steps": 128,
+    "eval.n_samples_per_prompt": 32,
+    "eval.temperature": 0.6,
+    "eval.top_p": 0.95
+  },
+  "variants": {
+    "gate_5e3": {
+      "actor.flash_gate_delta": 0.005
+    },
+    "no_trust": {
+      "actor.flash_gate_delta": "inf"
+    }
+  },
+  "notes": [
+    "Fresh-start segment with AIME24/25 avg@32 evaluation. Episodes count dataset passes.",
+    "gate_5e3 is a separate setting; selecting it does not reconstruct checkpoint continuation or schedule changes."
+  ]
+}
